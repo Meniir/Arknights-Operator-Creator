@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arknights Operator Maker</title>
+    <link href='https://fonts.googleapis.com/css?family=IBM Plex Sans Condensed' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="exusiai-theme.css">
+    <link rel="icon" href="Images/ExusiaiApple.png">
+</head>
+<body>
+    <img src="Images/ExusiaiApple.png" id="theme-switcher-btn" alt="Switch Theme" onclick="toggleExusiaiTheme()">
+
+    <div class="container">
+        <header>
+            <h1>Arknights Operator Maker</h1>
+        </header>
+
+        <div class="tab-nav">
+            <button class="tab-btn" onclick="openTab(event, 'info-panel')" id="defaultOpen">Information</button>
+            <button class="tab-btn" onclick="openTab(event, 'form-pannel')">Configuration</button>
+            <button class="tab-btn" onclick="openTab(event, 'final-result-panel')">Preview</button>
+        </div>
+
+        <div id="info-panel" class="tab-content">
+            <div class="info-content">
+                <h2>AK Operator Maker</h2>
+                <p>You can make your own Operator profiles here, which includes their basic information, skills, talents, modules, potentials, etc, etc.</p>
+                <h3>How to Use</h3>
+                <ul>
+                    <li><strong>Configuration Tab:</strong> The place where to actually make them. I trust you are an internet-literate person and you can navigate through this without much handholding. I'd assume your are since you play a Chinese gambling game rolling for fictional PNGs of characters, and I'm willing to bet this isn't the only one you play.</li>
+                    <li><strong>Preview Tab:</strong> The final results page. You can load a JSON file, save as a JSON file, and save as image. The blank portrait you see before you add any character image, I just took a random pic on google.</li>
+                </ul>
+                <h3><strong>Current Features</strong></h3>
+                <ul><strong>Skills, Talents, Modules:</strong> Add up to three (3) skills, two (2) talents, and one (1) module.</ul>
+                <ul><strong>Uploading & Asset Library:</strong> Upload a skill icon from your computer or through a URL, the size will be automatically adjusted, but it's recommended for a 64x64 pixel size. There is also a Library of presets for Skills and module (I know).</ul>
+                <ul><strong>Dynamic Archetype:</strong> Automatically changes archetype depending on the class.</ul>
+                <ul><strong>Edit Attack Range:</strong> Self-explanatory.</ul>
+                <ul><strong>Operator Archives:</strong> Self-explanatory.</ul>
+                <ul><strong>NOTICE:</strong> Save as image is a bit janky, so it's better of using an extension to capture the specific website.</ul>
+                <h3><strong>Planned Features (If I have the time or another fleeting interest)</strong></h3>
+                <ul><strong>-Rework the preview into something more like the actual operator view screen in the game.</strong></ul>
+                <ul><strong>-Add voiceline text.</strong></ul>
+                <ul><strong>-Make it so the skills, talents, and module is limited by the rarity.</strong></ul>
+                <ul><strong>-Themes, probably.</strong></ul>
+                <ul><strong>-Make Archetype logo appear next to the operator name on the preview tab.</strong></ul>
+                <ul><strong>-Add an E2 and level UI</strong></ul>
+                <ul><strong>-Base skills</strong></ul>
+            </div>
+        </div>
+
+        <div id="form-pannel" class="tab-content">
+            <div class="configuration-grid">
+                <div class="config-box">
+                    <h3>Basic Info</h3>
+                    <div class="labeled-input">
+                        <label for="operator-codename">[Code Name]</label>
+                        <input type="text" id="operator-codename" placeholder="e.g., Exusiai" onkeyup="updatePreview()">
+                    </div>
+                     <div class="labeled-input">
+                        <label for="operator-faction">[Faction]</label>
+                        <input type="text" id="operator-faction" placeholder="e.g., Penguin Logistics" onkeyup="updatePreview()">
+                    </div>
+                    <div class="sub-grid">
+                        <div class="labeled-input">
+                            <label for="operator-combat-exp">[Combat Experience]</label>
+                            <input type="text" id="operator-combat-exp" placeholder="e.g., 2 years" onkeyup="updatePreview()">
+                        </div>
+                        <div class="labeled-select">
+                            <label for="operator-gender">[Gender]</label>
+                            <select id="operator-gender" onchange="updatePreview()">
+                                <option>Female</option>
+                                <option>Male</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="sub-grid">
+                        <div class="labeled-input">
+                            <label for="operator-birthplace">[Place of Birth]</label>
+                            <input type="text" id="operator-birthplace" placeholder="e.g., Laterano" onkeyup="updatePreview()">
+                        </div>
+                        <div class="labeled-input">
+                            <label for="operator-birthday">[Date of Birth]</label>
+                            <input type="text" id="operator-birthday" placeholder="e.g., Dec. 24" onkeyup="updatePreview()">
+                        </div>
+                        <div class="labeled-select">
+                            <label for="operator-race">[Race]</label>
+                            <select id="operator-race" onchange="updatePreview()"></select>
+                        </div>
+                        <div class="labeled-input">
+                            <label for="operator-height">[Height]</label>
+                            <input type="text" id="operator-height" placeholder="e.g., 159cm" onkeyup="updatePreview()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-box">
+                    <h3>Operator Identity</h3>
+                    <div class="labeled-select">
+                        <label>Class & Archetype</label>
+                        <div class="sub-grid" style="gap: 5px;">
+                            <select id="operator-class" onchange="updateArchetypes()">
+                                <option>Sniper</option><option>Vanguard</option><option>Guard</option><option>Defender</option><option>Caster</option><option>Medic</option><option>Support</option><option>Specialist</option>
+                            </select>
+                            <select id="operator-archetype" onchange="updatePreview()"></select>
+                        </div>
+                    </div>
+                    <div class="labeled-input">
+                        <label for="operator-trait-desc">Trait</label>
+                        <div id="operator-trait-desc" class="trait-description">Select an archetype to see the corresponding trait.</div>
+                    </div>
+                     <div class="labeled-select">
+                        <label for="operator-rarity">Rarity</label>
+                        <select id="operator-rarity" onchange="updatePreview()">
+                            <option value="1">★</option><option value="2">★★</option><option value="3">★★★</option><option value="4">★★★★</option><option value="5">★★★★★</option><option value="6" selected>★★★★★★</option>
+                        </select>
+                    </div>
+                    <label for="operator-art-upload" class="file-upload-label">
+                        <span>Upload Operator Art</span>
+                        <input type="file" id="operator-art-upload" accept="image/*" onchange="handleImageUpload(event, 'preview-art')">
+                    </label>
+                </div>
+                
+                <div class="config-box">
+                    <h3>Physical Exam</h3>
+                    <div class="sub-grid">
+                        <div class="labeled-select">
+                            <label>[Physical Strength]</label>
+                            <select id="operator-strength" onchange="updatePreview()"></select>
+                        </div>
+                        <div class="labeled-select">
+                            <label>[Mobility]</label>
+                            <select id="operator-mobility" onchange="updatePreview()"></select>
+                        </div>
+                        <div class="labeled-select">
+                            <label>[Physical Resilience]</label>
+                            <select id="operator-resilience" onchange="updatePreview()"></select>
+                        </div>
+                        <div class="labeled-select">
+                            <label>[Tactical Acumen]</label>
+                            <select id="operator-acumen" onchange="updatePreview()"></select>
+                        </div>
+                        <div class="labeled-select">
+                            <label>[Combat Skill]</label>
+                            <select id="operator-combat-skill" onchange="updatePreview()"></select>
+                        </div>
+                        <div class="labeled-select">
+                            <label>[Originium Arts Assimilation]</label>
+                            <select id="operator-arts" onchange="updatePreview()"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-box">
+                    <h3>Clinical Analysis</h3>
+                    <div class="labeled-select">
+                        <label for="operator-infection">[Infection Status]</label>
+                        <select id="operator-infection" onchange="updatePreview()">
+                            <option>Non-infected as confirmed by medical report.</option>
+                            <option>Infected</option>
+                        </select>
+                    </div>
+                    <div class="labeled-input">
+                        <label>Analysis Text</label>
+                        <textarea id="operator-clinical-text" rows = "3" placeholder="Imaging tests reveal clear, normal outlines..." onkeyup="updatePreview()"></textarea>
+                    </div>
+                    <div class="sub-grid">
+                         <div class="labeled-input">
+                            <label>[Cell-Originium Assimilation]</label>
+                            <input type="text" id="operator-assimilation" placeholder="e.g., 0%" onkeyup="updatePreview()">
+                        </div>
+                        <div class="labeled-input">
+                            <label>[Blood Originium-Crystal Density]</label>
+                            <input type="text" id="operator-density" placeholder="e.g., 0.12u/L" onkeyup="updatePreview()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-box">
+                    <h3>Profile</h3>
+                    <div class="labeled-input">
+                        <textarea id="operator-profile-text" rows = "5" placeholder="Exusiai is a citizen of Laterano and as such, is entitled to the privileges listed in Clauses 1-13 of the Laterano Constitution..." onkeyup="updatePreview()"></textarea>
+                    </div>
+                </div>
+
+                <div class="config-box">
+                    <h3>Potentials</h3>
+                    <div class="labeled-input"><label>Potential 2</label><input type="text" id="operator-potential-2" placeholder="e.g., Deployment Cost -1" onkeyup="updatePreview()"></div>
+                    <div class="labeled-input"><label>Potential 3</label><input type="text" id="operator-potential-3" placeholder="e.g., Redeployment Time -3s" onkeyup="updatePreview()"></div>
+                    <div class="labeled-input"><label>Potential 4</label><input type="text" id="operator-potential-4" placeholder="e.g., ATK +25" onkeyup="updatePreview()"></div>
+                    <div class="labeled-input"><label>Potential 5</label><input type="text" id="operator-potential-5" placeholder="e.g., Talent Enhancement" onkeyup="updatePreview()"></div>
+                    <div class="labeled-input"><label>Potential 6</label><input type="text" id="operator-potential-6" placeholder="e.g., Deployment Cost -1" onkeyup="updatePreview()"></div>
+                </div>
+
+                <div class="config-box">
+                    <h3>Base Attributes (E2 Max)</h3>
+                    <div class="sub-grid">
+                        <div class="labeled-input"><label>HP</label><input type="number" id="operator-hp" placeholder="HP" onkeyup="updatePreview()"></div>
+                        <div class="labeled-input"><label>ATK</label><input type="number" id="operator-atk" placeholder="ATK" onkeyup="updatePreview()"></div>
+                        <div class="labeled-input"><label>DEF</label><input type="number" id="operator-def" placeholder="DEF" onkeyup="updatePreview()"></div>
+                        <div class="labeled-input"><label>RES</label><input type="number" id="operator-res" placeholder="RES" onkeyup="updatePreview()"></div>
+                        <div class="labeled-input"><label>Deploy Cost</label><input type="number" id="operator-cost" placeholder="Cost" onkeyup="updatePreview()"></div>
+                        <div class="labeled-input"><label>Block</label><input type="number" id="operator-block" placeholder="Block" onkeyup="updatePreview()"></div>
+                        <div class="labeled-input"><label>ASPD</label><input type="text" id="operator-aspd" placeholder="e.g., Very Fast" onkeyup="updatePreview()"></div>
+                        <div class="labeled-input"><label>Redeploy Time</label><input type="text" id="operator-redeploy" placeholder="e.g., 70s" onkeyup="updatePreview()"></div>
+                    </div>
+                </div>
+                 <div class="config-box">
+                    <h3>Attack Range</h3>
+                    <div id="range-config-grid" class="range-grid"></div>
+                </div>
+            </div>
+
+            <div class="secondary-grid">
+                <div class="left-stack">
+                    <div class="config-box">
+                        <div class="form-group-header"><h3>Talents</h3><button id="add-talent-btn" class="btn-add" onclick="addTalent()">+</button></div>
+                        <div id="talents-container"></div>
+                    </div>
+                    <div class="config-box">
+                        <div class="form-group-header"><h3>Skills</h3><button id="add-skill-btn" class="btn-add" onclick="addSkill()">+</button></div>
+                        <div id="skills-container"></div>
+                    </div>
+                    <div class="config-box">
+                        <div class="form-group-header"><h3>Modules</h3><label class="toggle-switch"><input type="checkbox" id="module-enabled" onchange="toggleModule()"><span class="slider"></span></label></div>
+                        <div id="module-container" class="hidden">
+                             <div class="image-selector-container">
+                                <img id="module-image-preview" src="https://placehold.co/128x128/1a1a1a/444444?text=Icon" alt="Module Icon">
+                                <div class="image-selector-buttons">
+                                     <button class="btn-small" onclick="document.getElementById('module-image-upload').click()">Upload</button>
+                                     <input type="file" id="module-image-upload" class="hidden" accept="image/*" onchange="handleImageUpload(event, 'module-image-preview')">
+                                     <button class="btn-small" onclick="openPresetLibrary('module-image-preview')">Library</button>
+                                     <button class="btn-small" onclick="promptForImageUrl('module-image-preview')">URL</button>
+                                </div>
+                            </div>
+                            <input type="text" id="module-name" placeholder="Module name" onkeyup="updatePreview()">
+                            <textarea id="module-trait" rows="3" placeholder="Upgraded Trait Description" onkeyup="updatePreview()"></textarea>
+                            <textarea id="module-talent1" rows="3" placeholder="New/Upgraded Talent 1" onkeyup="updatePreview()"></textarea>
+                            <textarea id="module-talent2" rows="3" placeholder="New/Upgraded Talent 2 (Optional)" onkeyup="updatePreview()"></textarea>                        
+                            <div class="form-group-header"><h4>Attribute bonuses</h4><button class="btn-add" onclick="addModuleAttribute()">+</button></div>
+                            <div id="module-attributes-container"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="config-box">
+                    <h3>Operator Archives</h3>
+                    <div class="labeled-input"><label>Archive File 1</label><textarea id="operator-archive1" rows="8" placeholder="Archive File 1" onkeyup="updatePreview()"></textarea></div>
+                    <div class="labeled-input"><label>Archive File 2</label><textarea id="operator-archive2" rows="8" placeholder="Archive File 2" onkeyup="updatePreview()"></textarea></div>
+                    <div class="labeled-input"><label>Archive File 3</label><textarea id="operator-archive3" rows="8" placeholder="Archive File 3" onkeyup="updatePreview()"></textarea></div>
+                    <div class="labeled-input"><label>Promotion Record</label><textarea id="operator-archive4" rows="8" placeholder="Promotion Record" onkeyup="updatePreview()"></textarea></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="final-result-panel" class="tab-content">
+            <div class="preview-actions">
+                <input type="file" id="load-operator-input" class="hidden" accept=".json" onchange="loadOperator(event)">
+                <button class="btn btn-load" onclick="document.getElementById('load-operator-input').click()">Load</button>
+                <button class="btn btn-save" onclick="saveOperator()">Save JSON</button>
+                <button class="btn btn-reset" onclick="resetForm()">Reset</button>
+                <button class="btn btn-saveImage" onclick="saveAsImage()">Save as Image</button>
+            </div>
+            <h2 class="panel-title">Operator Profile</h2>
+            <div class="preview-main-layout" id="operator-preview-area">
+                <div class="preview-left-column">
+                    <div class="preview-art-container"><img id="preview-art" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBAWe9-3wfVT-XVEr8UJ7lpH5FOZfNQH0Kng&s" alt="Operator Art"></div>
+                    <div class="preview-box">
+                         <h3 class="preview-box-title">Base Attributes</h3>
+                        <div class="preview-attributes-grid">
+                            <div><strong>HP:</strong> <span id="preview-hp">0</span></div>
+                            <div><strong>ATK:</strong> <span id="preview-atk">0</span></div>
+                            <div><strong>DEF:</strong> <span id="preview-def">0</span></div>
+                            <div><strong>RES:</strong> <span id="preview-res">0</span></div>
+                            <div><strong>Cost:</strong> <span id="preview-cost">0</span></div>
+                            <div><strong>Block:</strong> <span id="preview-block">0</span></div>
+                            <div><strong>ASPD:</strong> <span id="preview-aspd">0</span></div>
+                            <div><strong>Redeploy:</strong> <span id="preview-redeploy">0</span></div>
+                        </div>
+                    </div>
+                    <div class="preview-box">
+                        <h3 class="preview-box-title">Talents</h3>
+                        <div id="preview-talents"></div>
+                    </div>
+                    <div class="preview-box">
+                        <h3 class="preview-box-title">Attack Range</h3>
+                        <div id="preview-range-grid" class="range-grid preview-range"></div>
+                    </div>
+                </div>
+                <div class="preview-right-column">
+                    <div class="preview-header">
+                        <div id="preview-rarity" class="preview-rarity">★★★★★★</div>
+                        <h2 id="preview-codename">Operator name</h2>
+                        <div class="preview-subtitle"><span id="preview-faction">Faction</span> &bull; <span id="preview-class-icon">Class</span> &bull; <span id="preview-archetype">Archetype</span></div>
+                    </div>
+                    
+                    <div class="preview-box">
+                        <h3 class="preview-box-title">Basic Info</h3>
+                         <div class="preview-info-grid">
+                            <div>[Gender] <span id="preview-gender">...</span></div>
+                            <div>[Combat Experience] <span id="preview-combat-exp">...</span></div>
+                            <div>[Place of Birth] <span id="preview-birthplace">...</span></div>
+                            <div>[Date of Birth] <span id="preview-birthday">...</span></div>
+                            <div>[Race] <span id="preview-race">...</span></div>
+                            <div>[Height] <span id="preview-height">...</span></div>
+                        </div>
+                    </div>
+                     <div class="preview-box">
+                        <h3 class="preview-box-title">Profile</h3>
+                        <p id="preview-profile-text" class="profile-description">Operator description</p>
+                    </div>
+                    <div class="preview-box">
+                        <h3 class="preview-box-title">Clinical Analysis</h3>
+                        <p>[Infection Status] <span id="preview-infection"></span></p>
+                        <p id="preview-clinical-text" class="profile-description"></p>
+                        <div class="preview-info-grid">
+                            <div>[Cell-Originium Assimilation] <span id="preview-assimilation"></span></div>
+                            <div>[Blood Originium-Crystal Density] <span id="preview-density"></span></div>
+                        </div>
+                    </div>
+                    <div class="preview-box">
+                        <h3 class="preview-box-title">Physical Exam</h3>
+                        <div class="preview-info-grid">
+                            <div>[Physical Strength] <span id="preview-strength"></span></div>
+                            <div>[Mobility] <span id="preview-mobility"></span></div>
+                            <div>[Physical Resilience] <span id="preview-resilience"></span></div>
+                            <div>[Tactical Acumen] <span id="preview-acumen"></span></div>
+                            <div>[Combat Skill] <span id="preview-cs"></span></div>
+                            <div>[Originium Arts Assimilation] <span id="preview-oa"></span></div>
+                        </div>
+                    </div>
+                    <div class="skills-potentials-grid">
+                        <div class="preview-box">
+                            <h3 class="preview-box-title">Potentials</h3>
+                            <div id="preview-potentials"></div>
+                        </div>
+                        <div class="preview-box">
+                            <h3 class="preview-box-title">Skills</h3>
+                            <div id="preview-skills"></div>
+                        </div>
+                    </div>
+                    <div id="preview-module-container" class="hidden preview-box">
+                        <h3 class="preview-box-title">Operator Module</h3>
+                        <div class="module-header">
+                            <img id="preview-module-icon" src="https://placehold.co/64x64/1a1a1a/444444?text=Icon" alt="Module Icon">
+                            <div>
+                                <h4 id="preview-module-name">Module name</h4>
+                                <p><strong>Bonuses:</strong> <span id="preview-module-attributes"></span></p>
+                            </div>
+                        </div>
+                        <div class="module-details">
+                            <div><strong>Upgraded trait:</strong><p id="preview-module-trait"></p></div>
+                            <div id="preview-module-talent1-wrapper"><strong>Talent upgrade 1:</strong><p id="preview-module-talent1"></p></div>
+                            <div id="preview-module-talent2-wrapper"><strong>Talent upgrade 2:</strong><p id="preview-module-talent2"></p></div>
+                        </div>
+                    </div>
+                    <div class="preview-box">
+                        <h3 class="preview-box-title">Operator Archives</h3>
+                        <div id="archives-container">
+                            <div id="preview-archive1-container" class="hidden"><h4>Archive File 1</h4> <p id="preview-archive1"></p></div>
+                            <div id="preview-archive2-container" class="hidden"><h4>Archive File 2</h4> <p id="preview-archive2"></p></div>
+                            <div id="preview-archive3-container" class="hidden"><h4>Archive File 3</h4> <p id="preview-archive3"></p></div>
+                            <div id="preview-archive4-container" class="hidden"><h4>Promotion Record</h4> <p id="preview-archive4"></p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="preset-library-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Select a Preset Icon</h3>
+                <button class="btn-remove" onclick="closePresetLibrary()">&times;</button>
+            </div>
+            <div id="preset-library-grid" class="preset-grid">
+                </div>
+        </div>
+    </div>
+    
+    <button onclick="scrollToTop()" id="scrollToTopBtn" title="Go to top">↑</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="asset_links.js"></script>
+    <script src="loc_archetypes.js"></script>
+    <script src="script.js"></script>
+    <script src="exusiai-theme.js"></script>
+</body>
+</html>
