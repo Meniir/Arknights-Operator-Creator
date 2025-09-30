@@ -1003,9 +1003,10 @@ const presetIcons = [
 ];
 
 const potentialImageUrls = [
-    'https://arknights.wiki.gg/images/4/43/Potential_2.png',
-    'https://arknights.wiki.gg/images/c/c8/Potential_3.png',
-    'https://arknights.wiki.gg/images/5/52/Potential_4.png',
-    'https://arknights.wiki.gg/images/8/8e/Potential_5.png',
-    'https://arknights.wiki.gg/images/3/30/Potential_6.png'
+    'Images/potentials/potential_1.png',
+    'Images/potentials/potential_2.png',
+    'Images/potentials/potential_3.png',
+    'Images/potentials/potential_4.png',
+    'Images/potentials/potential_5.png'
+
 ];
