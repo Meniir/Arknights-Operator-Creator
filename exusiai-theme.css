@@ -82,7 +82,7 @@ body.exusiai-theme {
 .exusiai-theme .range-cell.selected { background-color: var(--exu-accent); border-color: var(--exu-accent-hover); }
 .exusiai-theme .preview-range .range-cell { background-color: #fff7f7; }
 .exusiai-theme .preview-range .range-cell.operator { background-color: #c0a0a0; }
-.exusiai-theme .preview-range .range-cell.selected { background-color: #fff9f9; }
+.exusiai-theme .preview-range .range-cell.selected { background-color: #ADD8E6; }
 
 .exusiai-theme .slider { background-color: #c0a0a0; }
 .exusiai-theme .file-upload-label { border-color: var(--exu-border); }
