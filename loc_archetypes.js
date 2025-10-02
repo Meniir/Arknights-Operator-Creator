@@ -164,5 +164,6 @@ const archetypeTraits = {
     'Skyranger': 'Melee; can take off with skills to block aerial enemies.'
 };
 
-const races = ['Aegir', 'Anasa', 'Anaty', 'Archosauria', 'Aslan', 'Caprinae', 'Cautus', 'Cerato', 'Chimera', 'Draco', 'Durin', 'Elafia', 'Feline', 'Forte', 'Itra', 'Kuranta', 'Liberi', 'Lupo', 'Lung', 'Oni', 'Perro', 'Petram', 'Pilosa', 'Pythia', 'Reptilia', 'Sankta', 'Sarkaz', 'Savra', 'Ursus', 'Vouivre', 'Vulpo', 'Zalak', 'Not specified'];
+const races = ['Aegir', 'Anasa', 'Anaty', 'Archosauria', 'Aslan', 'Caprinae', 'Cautus', 'Cerato', 'Chimera', 'Draco', 'Durin', 'Elafia', 'Feline', 'Forte', 'Itra', 'Kuranta', 'Liberi', 'Lupo', 'Lung', 'Oni', 'Perro', 'Petram', 'Pilosa', 'Pythia', 'Reptilia', 'Sankta', 'Sarkaz', 'Savra', 'Ursus', 'Vouivre', 'Vulpo', 'Zalak', 'Earthling', 'Not specified'];
+
 const physicalRatings = ['Flawed', 'Poor', 'Standard', 'Good', 'Excellent', 'Outstanding'];
