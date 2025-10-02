@@ -39,7 +39,6 @@
                 <ul><strong>Edit Attack Range:</strong> Self-explanatory.</ul>
                 <ul><strong>Operator Archives:</strong> Self-explanatory.</ul>
                 <ul><strong>NOTICE:</strong> Save as image is a bit janky, so it's better of using an extension to capture the specific website.</ul>
-                <ul><strong>NOTICE 2:</strong> Always assume that the operator is always at E2 max level with max trust.</ul>
                 <h3><strong>Planned Features (If I have the time or another fleeting interest)</strong></h3>
                 <ul><strong>-Rework the preview into something more like the actual operator view screen in the game.</strong></ul>
                 <ul><strong>-Add voiceline text.</strong></ul>
@@ -159,7 +158,7 @@
                     <div class="labeled-select">
                         <label for="operator-infection">[Infection Status]</label>
                         <select id="operator-infection" onchange="updatePreview()">
-                            <option>Non-infected</option>
+                            <option>Non-infected as confirmed by medical report.</option>
                             <option>Infected</option>
                         </select>
                     </div>
@@ -196,7 +195,7 @@
                 </div>
 
                 <div class="config-box">
-                    <h3>Base Attributes (at E2 max level & max trust)</h3>
+                    <h3>Base Attributes (E2 Max)</h3>
                     <div class="sub-grid">
                         <div class="labeled-input"><label>HP</label><input type="number" id="operator-hp" placeholder="HP" onkeyup="updatePreview()"></div>
                         <div class="labeled-input"><label>ATK</label><input type="number" id="operator-atk" placeholder="ATK" onkeyup="updatePreview()"></div>
@@ -370,6 +369,30 @@
         </div>
     </div>
 
+    <div id="changelog-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Update Changelog</h3>
+                <button class="btn-remove" onclick="closeChangelogModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                </div>
+        </div>
+    </div>
+    
+    <div id="skill-range-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="skill-range-modal-title">Edit Skill Attack Range</h3>
+                <button class="btn-remove" onclick="closeSkillRangeModal()">&times;</button>
+            </div>
+            <div id="skill-range-config-grid" class="range-grid"></div>
+            <div class="modal-actions">
+                <button class="btn" onclick="saveSkillRange()">Save and Close</button>
+            </div>
+        </div>
+    </div>
+
     <div id="preset-library-modal" class="modal-backdrop hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -386,11 +409,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="asset_links.js"></script>
     <script src="loc_archetypes.js"></script>
+    <script src="changelog.js"></script>
     <script src="script.js"></script>
     <script src="exusiai-theme.js"></script>
 </body>
-
 </html>
-
-
-

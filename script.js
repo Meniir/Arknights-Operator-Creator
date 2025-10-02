@@ -1,4 +1,6 @@
 let modalTargetId = '';
+const appVersion = '1.2';
+let currentSkillRangeEditorId = null;
 
 function loadDefaultOperator() {
     populateForm(defaultOperatorData);
@@ -12,6 +14,45 @@ function openTab(evt, tabName) {
     for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); }
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
+}
+
+function showChangelogModal() {
+    const modalBody = document.querySelector('#changelog-modal .modal-body');
+    modalBody.innerHTML = ''; // Clear previous content to avoid duplication.
+
+    // Iterate through the changelogData array (from changelog.js)
+    // The data is already sorted newest to oldest.
+    changelogData.forEach(versionInfo => {
+        // Create a container for each version's entry.
+        const entryContainer = document.createElement('div');
+        
+        // Add the version number as a paragraph with a strong tag.
+        const versionHeader = document.createElement('p');
+        versionHeader.innerHTML = `<strong>Version ${versionInfo.version}</strong>`;
+        entryContainer.appendChild(versionHeader);
+
+        // Create an unordered list for the changes for this version.
+        const changesList = document.createElement('ul');
+        changesList.className = 'changelog-list'; // Use the existing class for styling.
+        
+        // Populate the list with individual changes.
+        versionInfo.changes.forEach(changeText => {
+            const listItem = document.createElement('li');
+            listItem.textContent = changeText;
+            changesList.appendChild(listItem);
+        });
+        
+        entryContainer.appendChild(changesList);
+        modalBody.appendChild(entryContainer);
+    });
+
+    // Show the modal.
+    document.getElementById('changelog-modal').classList.remove('hidden');
+}
+
+
+function closeChangelogModal() {
+    document.getElementById('changelog-modal').classList.add('hidden');
 }
 
 let talentCount = 0, skillCount = 0, moduleAttrCount = 0;
@@ -69,6 +110,7 @@ function addSkill(data = {}) {
     const newSkill = document.createElement('div');
     newSkill.id = `skill-group-${skillCount}`;
     newSkill.className = 'skill-group dynamic-group';
+    newSkill.dataset.range = JSON.stringify(data.range || []);
     const defaultIcon = 'https://placehold.co/64x64/1a1a1a/444444?text=Icon';
     
     newSkill.innerHTML = `
@@ -94,6 +136,7 @@ function addSkill(data = {}) {
             <input type="number" id="skill-initial-sp-${skillCount}" placeholder="Initial SP" onkeyup="updatePreview()" value="${data.initialSp || ''}">
             <input type="text" id="skill-duration-${skillCount}" placeholder="Duration" onkeyup="updatePreview()" value="${data.duration || ''}">
         </div>
+        <button type="button" class="btn btn-small" style="width: 100%; margin: 8px 0 4px 0;" onclick="openSkillRangeModal(${skillCount})">Set Skill Attack Range</button>
         <textarea id="skill-desc-${skillCount}" rows="4" placeholder="Skill Description" onkeyup="updatePreview()">${data.desc || ''}</textarea>`;
     
     container.appendChild(newSkill);
@@ -126,7 +169,7 @@ function addModuleAttribute(data = {}) {
     const newAttr = document.createElement('div');
     newAttr.id = `module-attr-group-${moduleAttrCount}`;
     newAttr.className = 'module-attr-row';
-    newAttr.innerHTML = `<select id="module-attr-stat-${moduleAttrCount}"><option>HP</option><option>ATK</option><option>DEF</option><option>RES</option></select><input type="number" id="module-attr-value-${moduleAttrCount}" placeholder="Value" onkeyup="updatePreview()" value="${data.value || ''}"><button class="btn-remove" onclick="removeElement('module-attr-group-${moduleAttrCount}')">&times;</button>`;
+    newAttr.innerHTML = `<select id="module-attr-stat-${moduleAttrCount}"><option>HP</option><option>ATK</option><option>DEF</option><option>RES</option><option>ASPD</option></select><input type="number" id="module-attr-value-${moduleAttrCount}" placeholder="Value" onkeyup="updatePreview()" value="${data.value || ''}"><button class="btn-remove" onclick="removeElement('module-attr-group-${moduleAttrCount}')">&times;</button>`;
     container.appendChild(newAttr);
     if (data.stat) document.getElementById(`module-attr-stat-${moduleAttrCount}`).value = data.stat;
 }
@@ -141,8 +184,11 @@ function toggleModule() {
 function createRangeGrids() {
     const configGrid = document.getElementById('range-config-grid');
     const previewGrid = document.getElementById('preview-range-grid');
-    const gridSize = 7 * 7;
-    const operatorIndex = 24;
+    configGrid.innerHTML = ''; 
+    previewGrid.innerHTML = '';
+
+    const gridSize = 9 * 9;
+    const operatorIndex = 40;
 
     for (let i = 0; i < gridSize; i++) {
         const configCell = document.createElement('div');
@@ -166,6 +212,52 @@ function createRangeGrids() {
         }
         previewGrid.appendChild(previewCell);
     }
+}
+
+function createGridInContainer(containerId, gridSize, operatorIndex) {
+    const gridContainer = document.getElementById(containerId);
+    gridContainer.innerHTML = '';
+    for (let i = 0; i < gridSize; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('range-cell');
+        if (i === operatorIndex) {
+            cell.classList.add('operator');
+        } else {
+            cell.addEventListener('click', () => cell.classList.toggle('selected'));
+        }
+        gridContainer.appendChild(cell);
+    }
+}
+
+function openSkillRangeModal(skillId) {
+    currentSkillRangeEditorId = skillId;
+    const skillName = getValue(`skill-name-${skillId}`) || `Skill ${skillId}`;
+    document.getElementById('skill-range-modal-title').textContent = `Edit Range for: ${skillName}`;
+    const skillGroup = document.getElementById(`skill-group-${skillId}`);
+    const rangeData = JSON.parse(skillGroup.dataset.range || '[]');
+    const gridCells = document.querySelectorAll('#skill-range-config-grid .range-cell');
+    gridCells.forEach((cell, index) => {
+        cell.classList.toggle('selected', rangeData.includes(index));
+    });
+    document.getElementById('skill-range-modal').classList.remove('hidden');
+}
+
+function closeSkillRangeModal() {
+    document.getElementById('skill-range-modal').classList.add('hidden');
+    currentSkillRangeEditorId = null;
+}
+
+function saveSkillRange() {
+    if (currentSkillRangeEditorId === null) return;
+    const newRange = [];
+    document.querySelectorAll('#skill-range-config-grid .range-cell.selected').forEach(cell => {
+        const index = Array.from(cell.parentNode.children).indexOf(cell);
+        newRange.push(index);
+    });
+    const skillGroup = document.getElementById(`skill-group-${currentSkillRangeEditorId}`);
+    skillGroup.dataset.range = JSON.stringify(newRange);
+    closeSkillRangeModal();
+    updatePreview();
 }
 
 function openPresetLibrary(target) {
@@ -205,6 +297,26 @@ function promptForImageUrl(targetId) {
     }
 }
 
+function showSkillRangeOverlay(skillId) {
+    hideSkillRangeOverlay();
+    const skillGroup = document.getElementById(`skill-group-${skillId}`);
+    if (!skillGroup) return;
+    const rangeData = JSON.parse(skillGroup.dataset.range || '[]');
+    if (rangeData.length === 0) return;
+    const previewCells = document.querySelectorAll('#preview-range-grid .range-cell');
+    rangeData.forEach(index => {
+        if (previewCells[index]) {
+            previewCells[index].classList.add('skill-range-overlay');
+        }
+    });
+}
+
+function hideSkillRangeOverlay() {
+    document.querySelectorAll('#preview-range-grid .skill-range-overlay').forEach(cell => {
+        cell.classList.remove('skill-range-overlay');
+    });
+}
+
 function updatePreview() {
     setText('preview-codename', getValue('operator-codename'), 'Operator Name');
     setText('preview-faction', getValue('operator-faction'), 'Faction');
@@ -237,8 +349,26 @@ function updatePreview() {
     setHtml('preview-talents', talentsHtml || '<p class="placeholder-text">No talents defined.</p>');
 
     let skillsHtml = '';
-    document.querySelectorAll('.skill-group').forEach((el, index) => { const id = el.id.split('-')[2]; const name = getValue(`skill-name-${id}`), desc = getValue(`skill-desc-${id}`), spCost = getValue(`skill-sp-cost-${id}`), initialSp = getValue(`skill-initial-sp-${id}`), duration = getValue(`skill-duration-${id}`); const imgSrc = document.getElementById(`skill-image-preview-${id}`)?.src; if (name || desc) skillsHtml += `<div class="preview-skill-card preview-item"><img src="${imgSrc}" alt="skill icon"><div><h4>${name || `Skill ${index + 1}`}</h4><div class="skill-stats">${spCost ? `<span><strong>SP:</strong> ${spCost}</span>` : ''}${initialSp ? `<span><strong>Initial:</strong> ${initialSp}</span>` : ''}${duration ? `<span><strong>Duration:</strong> ${duration}</span>` : ''}</div><p>${desc.replace(/\n/g, '<br>') || '...'}</p></div></div>`; });
-    setHtml('preview-skills', skillsHtml || '<p class="placeholder-text">No skills defined.</p>');
+    document.querySelectorAll('.skill-group').forEach((el, index) => {
+        const id = el.id.split('-')[2];
+        const name = getValue(`skill-name-${id}`), desc = getValue(`skill-desc-${id}`), spCost = getValue(`skill-sp-cost-${id}`), initialSp = getValue(`skill-initial-sp-${id}`), duration = getValue(`skill-duration-${id}`);
+        const imgSrc = document.getElementById(`skill-image-preview-${id}`)?.src;
+        if (name || desc) {
+            skillsHtml += `<div class="preview-skill-card preview-item" onmouseover="showSkillRangeOverlay(${id})">
+                <img src="${imgSrc}" alt="skill icon">
+                <div>
+                    <h4>${name || `Skill ${index + 1}`}</h4>
+                    <div class="skill-stats">
+                        ${spCost ? `<span><strong>SP:</strong> ${spCost}</span>` : ''}
+                        ${initialSp ? `<span><strong>Initial:</strong> ${initialSp}</span>` : ''}
+                        ${duration ? `<span><strong>Duration:</strong> ${duration}</span>` : ''}
+                    </div>
+                    <p>${desc.replace(/\n/g, '<br>') || '...'}</p>
+                </div>
+            </div>`;
+        }
+    });
+    setHtml('preview-skills', `<div onmouseout="hideSkillRangeOverlay()">${skillsHtml || '<p class="placeholder-text">No skills defined.</p>'}</div>`);
 
     let potentialLines = [];
     for (let i = 2; i <= 6; i++) {
@@ -257,7 +387,15 @@ function updatePreview() {
         setHtml('preview-module-trait', getValue('module-trait').replace(/\n/g, '<br>'));
         const t1 = getValue('module-talent1'); document.getElementById('preview-module-talent1-wrapper').classList.toggle('hidden', !t1); setHtml('preview-module-talent1', t1.replace(/\n/g, '<br>'));
         const t2 = getValue('module-talent2'); document.getElementById('preview-module-talent2-wrapper').classList.toggle('hidden', !t2); setHtml('preview-module-talent2', t2.replace(/\n/g, '<br>'));
-        let attrs = []; document.querySelectorAll('[id^="module-attr-group-"]').forEach(el => { const id = el.id.split('-')[3]; const stat = getValue(`module-attr-stat-${id}`), value = getValue(`module-attr-value-${id}`); if (value) attrs.push(`${stat} +${value}`); });
+        let attrs = [];
+        document.querySelectorAll('[id^="module-attr-group-"]').forEach(el => {
+            const id = el.id.split('-')[3];
+            const stat = getValue(`module-attr-stat-${id}`);
+            const value = getValue(`module-attr-value-${id}`);
+            if (value) {
+                attrs.push(`${stat} ${stat !== 'ASPD' ? '+' : ''}${value}`);
+            }
+        });
         setText('preview-module-attributes', attrs.join(', ') || 'None');
     }
 
@@ -284,7 +422,18 @@ function saveOperator() {
         range: []
     };
     document.querySelectorAll('.talent-group').forEach(el => { const id = el.id.split('-')[2]; operatorData.talents.push({ name: getValue(`talent-name-${id}`), desc: getValue(`talent-desc-${id}`) }); });
-    document.querySelectorAll('.skill-group').forEach(el => { const id = el.id.split('-')[2]; operatorData.skills.push({ name: getValue(`skill-name-${id}`), spCost: getValue(`skill-sp-cost-${id}`), initialSp: getValue(`skill-initial-sp-${id}`), duration: getValue(`skill-duration-${id}`), desc: getValue(`skill-desc-${id}`), imgData: document.getElementById(`skill-image-preview-${id}`).dataset.base64 }); });
+    document.querySelectorAll('.skill-group').forEach(el => {
+        const id = el.id.split('-')[2];
+        operatorData.skills.push({
+            name: getValue(`skill-name-${id}`),
+            spCost: getValue(`skill-sp-cost-${id}`),
+            initialSp: getValue(`skill-initial-sp-${id}`),
+            duration: getValue(`skill-duration-${id}`),
+            desc: getValue(`skill-desc-${id}`),
+            imgData: document.getElementById(`skill-image-preview-${id}`).dataset.base64,
+            range: JSON.parse(el.dataset.range || '[]')
+        });
+    });
     document.querySelectorAll('[id^="module-attr-group-"]').forEach(el => { const id = el.id.split('-')[3]; operatorData.module.attributes.push({ stat: getValue(`module-attr-stat-${id}`), value: getValue(`module-attr-value-${id}`) }); });
     document.querySelectorAll('#range-config-grid .range-cell').forEach(cell => { if (cell.classList.contains('selected')) { operatorData.range.push(parseInt(cell.dataset.index)); }});
     
@@ -382,7 +531,11 @@ function resetForm(isSilent = false) {
 }
 
 window.onload = () => {
+    showChangelogModal();
+    
     createRangeGrids();
+    createGridInContainer('skill-range-config-grid', 9 * 9, 40);
+
     populateSelect('operator-race', races);
     ['operator-strength', 'operator-mobility', 'operator-resilience', 'operator-acumen', 'operator-combat-skill', 'operator-arts'].forEach(id => populateSelect(id, physicalRatings));
 
